@@ -1,0 +1,10 @@
+# Folder
+/.venv
+__pycache__/
+
+# Files
+*.docx
+*.pdf
+
+# Data
+*csv

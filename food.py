@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import re
+import os
 
 class Food:
     """ class food """
@@ -68,6 +70,10 @@ class Food:
 
             return url_1 if response_1.status_code == 200 else url_2
         
+        def clean_value(value: str) -> float:
+            number = re.sub(r"[^\d,\.]", "", value)
+            return float(number.replace(",", "."))
+        
         url = get_url(food_name)
         response = requests.get(url)
         if response.status_code == 200:
@@ -83,14 +89,14 @@ class Food:
 
         # Find aliment characteristics
         characteristics = soup.find("div", id="diva").find_all("b")
-        self._calories = characteristics[0].get_text()
-        self._proteins = characteristics[1].get_text()
-        self._carbs = characteristics[2].get_text()
-        self._fat = characteristics[3].get_text()
-        self._name = aliment
+        self.__calories = clean_value(characteristics[0].get_text())
+        self.__proteins = clean_value(characteristics[1].get_text())
+        self.__carbs = clean_value(characteristics[2].get_text())
+        self.__fat = clean_value(characteristics[3].get_text())
+        self.__name = aliment
 
 
-        return self._calories, self._proteins, self._carbs, self._fat, self._name
+        return self.__calories, self.__proteins, self.__carbs, self.__fat, self.__name
         
 
     def display_food_infos(self):
@@ -101,18 +107,22 @@ class Food:
                 tomate	    21.0		0.3	    4.6	    0.8
                 ------------------------------------------------
         """
-        print(f"{'name':<10} {'calories':<10} {'fat':<10} {'carbs':<10} {'proteins':<10}")
         print("-" * 50)
-        print(f"{self._name:<10} {self._calories:<10} {self._fat:<10} {self._carbs:<10} {self._proteins:<10}")
+        print(f"{'name':<10} {'calories':<10} {'fat':<10} {'carbs':<10} {'proteins':<10}")
+        print(f"{self.__name:<10} {self.__calories:<10} {self.__fat:<10} {self.__carbs:<10} {self.__proteins:<10}")
+        print("-" * 50)
 
     
     def save_to_csv_file(self, file_name):
         """ function : save the properties of the food in a csv file 
         - use function with for file opening
         """
+        file_exists = os.path.exists(file_name)
+    
         with open(file_name, 'a') as file:
-            file.write(f"name,calories,fat,carbs,proteins\n")
-            file.write(f"{self._name},{self._calories},{self._fat},{self._carbs},{self._proteins}\n")
+            if not file_exists:  # header seulement si le fichier est nouveau
+                file.write("name,calories,fat,carbs,proteins\n")
+            file.write(f"{self.__name},{self.__calories},{self.__fat},{self.__carbs},{self.__proteins}\n")
 
 
     def is_fat(self):
@@ -120,11 +130,11 @@ class Food:
         - define a fat threshold and write the function accordingly
         """
         fat_threshold = 20
-        return float(self._fat) > fat_threshold
+        return float(self.__fat) > fat_threshold
         
 if __name__ == "__main__":
     food = Food()
     food.retrieve_food_infos("tomate")
     food.display_food_infos()
     food.save_to_csv_file("food.csv")
-    print(food.is_fat())
+    print(f"Aliment gras ? : {food.is_fat()}")

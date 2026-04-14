@@ -1,7 +1,7 @@
+import os
+import re
 import requests
 from bs4 import BeautifulSoup
-import re
-import os
 
 class Food:
     """ class food """
@@ -22,7 +22,6 @@ class Food:
     def get_calories(self):
         """ function : get the property named calories of the food """
         return self.__calories
-        
 
     def set_calories(self,calories):
         """ function : set the property named calories of the food """
@@ -61,27 +60,42 @@ class Food:
         
         """
         """ function : get the URL of the food given its name """
-        def get_url(food_name):
-            # food_name = food_name.uppercase()
+
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            ),
+            "Accept": "application/rss+xml, application/xml, text/xml, */*",
+        }
+        
+        def get_url(food_name: str):
+            """
+            function : normalize the link to avoid breaking the program
+            """
+            food_name = food_name.lower()
             url_1 = f"https://www.infocalories.fr/calories/calories-{food_name}-fruit.php"
             url_2 = f"https://www.infocalories.fr/calories/calories-{food_name}.php"
 
-            response_1 = requests.get(url_1)
-            response_2 = requests.get(url_2)
-
+            response_1 = requests.get(timeout=5, url=url_1, headers=headers)
             return url_1 if response_1.status_code == 200 else url_2
         
         def clean_value(value: str) -> float:
+            """
+            function : remove the the unite and keep the number
+            """
             number = re.sub(r"[^\d,\.]", "", value)
             return float(number.replace(",", "."))
         
+        # Fetch the url
         url = get_url(food_name)
-        response = requests.get(url)
+        response = requests.get(timeout=5, url=url, headers=headers)
         if response.status_code == 200:
-            message = f"Site fonctionnel: {response.status_code}"
+            pass
         else: 
             raise Exception(f"Erreur: {response.status_code}")
         
+        # load the content (html)
         soup = BeautifulSoup(response.content, "html.parser")
 
         # Aliment name
@@ -96,10 +110,8 @@ class Food:
         self.__fat = clean_value(characteristics[3].get_text())
         self.__name = aliment
 
-
         return self.__calories, self.__proteins, self.__carbs, self.__fat, self.__name
         
-
     def display_food_infos(self):
         """ function : display the properties of the food 
         the outlook should be similar to this:
@@ -113,18 +125,15 @@ class Food:
         print(f"{self.__name:<10} {self.__calories:<10} {self.__fat:<10} {self.__carbs:<10} {self.__proteins:<10}")
         print("-" * 50)
 
-    
     def save_to_csv_file(self, file_name):
         """ function : save the properties of the food in a csv file 
         - use function with for file opening
         """
         file_exists = os.path.exists(file_name)
-    
-        with open(file_name, 'a') as file:
-            if not file_exists:  # header seulement si le fichier est nouveau
+        with open(file_name, encoding="utf8", mode='a') as file:
+            if not file_exists:
                 file.write("name,calories,fat,carbs,proteins\n")
             file.write(f"{self.__name},{self.__calories},{self.__fat},{self.__carbs},{self.__proteins}\n")
-
 
     def is_fat(self):
         """ function : return true or false whether the food has more than 20% of fat 
@@ -133,9 +142,3 @@ class Food:
         fat_threshold = 20
         return float(self.__fat) > fat_threshold
         
-if __name__ == "__main__":
-    food = Food()
-    food.retrieve_food_infos("tomate")
-    food.display_food_infos()
-    food.save_to_csv_file("food.csv")
-    print(f"Aliment gras ? : {food.is_fat()}")

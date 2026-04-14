@@ -62,6 +62,7 @@ class Food:
         """
         """ function : get the URL of the food given its name """
         def get_url(food_name):
+            # food_name = food_name.uppercase()
             url_1 = f"https://www.infocalories.fr/calories/calories-{food_name}-fruit.php"
             url_2 = f"https://www.infocalories.fr/calories/calories-{food_name}.php"
 
@@ -77,7 +78,7 @@ class Food:
         url = get_url(food_name)
         response = requests.get(url)
         if response.status_code == 200:
-            print(f"Site fonctionnel: {response.status_code}")
+            message = f"Site fonctionnel: {response.status_code}"
         else: 
             raise Exception(f"Erreur: {response.status_code}")
         

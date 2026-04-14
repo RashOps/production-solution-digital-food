@@ -1,7 +1,9 @@
+"""
+Launch function in command line
+"""
+
 from food import Food
 import argparse
-
-import sys
 print("Running script...")
 
 parser = argparse.ArgumentParser("Food Informations")

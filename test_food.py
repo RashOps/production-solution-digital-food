@@ -1,6 +1,10 @@
+"""
+File : Test the Food class and its functions
+"""
+
+import os
 import unittest
 from food import Food
-import os
 
 class TestFood(unittest.TestCase):
     """ class test food """

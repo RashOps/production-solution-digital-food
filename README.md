@@ -82,6 +82,12 @@ python get_food.py -f pomme
 
 Les données seront affichées dans la console et sauvegardées dans `food.csv`.
 
+## Déploiement
+
+L'application est déployée en ligne et accessible via Streamlit Cloud :
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_on_white.svg)](https://projet-solution-digital-food.streamlit.app/)
+
 ## Structure du Projet
 
 - `main.py` : Application Streamlit

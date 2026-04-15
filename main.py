@@ -2,66 +2,103 @@
 Launch the food script with Streamlit UI
 """
 import streamlit as st
+import pandas as pd
 from food import Food
 
-# Title
-st.title("Food Characteristics retriever")
-st.subheader("Retrieve any food characteristics : Calorie, Fat, Carbs, Proteins")
+# Configuration de la page
+st.set_page_config(page_title="Food Characteristics Retriever", page_icon="🍎", layout="wide")
 
-# Search line
-aliment_col, button_aliment_col = st.columns(2)
+# Sidebar pour options supplémentaires
+with st.sidebar:
+    st.header("Options")
+    if st.button("Effacer l'historique"):
+        st.session_state.history = []
+        st.rerun()
+    st.markdown("---")
+    st.markdown("**Historique des recherches :**")
+    if "history" not in st.session_state:
+        st.session_state.history = []
+    for item in st.session_state.history[-5:]:  # Afficher les 5 dernières
+        st.write(f"- {item}")
 
-# Aliment
-aliment = st.text_input("Entrez le nom d'un aliment", value="pomme")
-button = st.button(label="Recherche", key="food-retrieve", type="primary")
-st.space("xsmall")
+# Titre principal avec icône
+st.title("🍎 Food Characteristics Retriever")
+st.subheader("Récupérez les caractéristiques nutritionnelles : Calories, Protéines, Glucides, Lipides")
 
-# Foods infos
-st.markdown("## ---------------------- Food infos ----------------------", text_alignment="center")
+# Section de recherche
+st.markdown("### 🔍 Recherche d'aliment")
+col_input, col_button = st.columns([3, 1])
 
+with col_input:
+    aliment = st.text_input("Entrez le nom d'un aliment", value="pomme", placeholder="Ex: pomme, banane...")
+
+with col_button:
+    button = st.button("Rechercher", type="primary", use_container_width=True)
+
+# Validation d'entrée
+if button and not aliment.strip():
+    st.error("Veuillez entrer un nom d'aliment valide.")
+    st.stop()
+
+# Section d'affichage des infos
+st.markdown("---")
+st.markdown("## 📊 Informations nutritionnelles")
 
 # Valeurs par défaut
-calories, proteins, carbs, fat, is_fat = 73.0, 0.4, 17.0, 0.4, False
+calories, proteins, carbs, fat, is_fat = 0.0, 0.0, 0.0, 0.0, False
+food_name = ""
 
-# Aliment retrieval 
-if button:                          
-    try:
-        food = Food()
-        food.retrieve_food_infos(str(aliment))
-        calories = food.get_calories()
-        proteins = food.get_proteins()
-        carbs    = food.get_carbs()
-        fat      = food.get_fat()
-        is_fat   = food.is_fat()
-    except ValueError as e:
-        st.error(str(e))
-    except Exception as e:
-        st.error(f"Erreur inattendue : {e}")
+# Récupération des données avec spinner
+if button and aliment.strip():
+    with st.spinner("Recherche en cours..."):
+        try:
+            food = Food()
+            food.retrieve_food_infos(str(aliment))
+            calories = food.get_calories()
+            proteins = food.get_proteins()
+            carbs = food.get_carbs()
+            fat = food.get_fat()
+            is_fat = food.is_fat()
+            food_name = aliment
 
+            # Ajouter à l'historique
+            if aliment not in st.session_state.history:
+                st.session_state.history.append(aliment)
 
-# Sections
-col_1, col_2 = st.columns(2, vertical_alignment="bottom", border=True) 
-col_3, col_4 = st.columns(2, vertical_alignment="bottom", border=True) 
+            st.success(f"Données récupérées pour '{aliment}' !")
+        except ValueError as e:
+            st.error(f"Erreur : {str(e)}")
+        except Exception as e:
+            st.error(f"Erreur inattendue : {e}")
 
-# Sections badges
-with col_1:
-    st.badge("Calories", color="orange")
-    st.metric(label="Kcal", value=calories)
+# Affichage des métriques
+if food_name:
+    col1, col2, col3, col4 = st.columns(4)
 
-with col_2:
-    st.badge("Proteins", color="gray")
-    st.metric(label="grammes", value=proteins)
+    with col1:
+        st.metric("Calories", f"{calories} Kcal", delta=None)
+    with col2:
+        st.metric("Protéines", f"{proteins} g", delta=None)
+    with col3:
+        st.metric("Glucides", f"{carbs} g", delta=None)
+    with col4:
+        st.metric("Lipides", f"{fat} g", delta=None)
 
-with col_3:
-    st.badge("Carbs", color="violet")
-    st.metric(label="grammes", value=carbs)
+    # Indicateur gras/non gras
+    if is_fat:
+        st.warning("⚠️ Aliment considéré comme gras (lipides > 20g)")
+    else:
+        st.info("✅ Aliment non gras")
 
-with col_4:
-    st.badge("Fat", color="yellow")
-    st.metric(label="grammes", value=fat)
+    # Graphique en barres
+    st.markdown("### 📈 Répartition nutritionnelle")
+    data = {"Nutriment": ["Protéines", "Glucides", "Lipides"], "Quantité (g)": [proteins, carbs, fat]}
+    df = pd.DataFrame(data)
+    st.bar_chart(df.set_index("Nutriment"))
 
-if not is_fat:
-    st.info("Aliment non gras", icon="🆗")
+    # Bouton d'export
+    if st.button("Exporter en CSV"):
+        csv_data = f"name,calories,fat,carbs,proteins\n{food_name},{calories},{fat},{carbs},{proteins}"
+        st.download_button("Télécharger CSV", csv_data, file_name=f"{food_name}.csv", mime="text/csv")
 else:
-    st.warning("Aliment gras", icon="🚨")
-    
+    st.info("Entrez un aliment et cliquez sur 'Rechercher' pour afficher les informations.")

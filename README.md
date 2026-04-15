@@ -86,7 +86,7 @@ Les données seront affichées dans la console et sauvegardées dans `food.csv`.
 
 L'application est déployée en ligne et accessible via Streamlit Cloud :
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_on_white.svg)](https://projet-solution-digital-food.streamlit.app/)
+[![Streamlit App](https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://projet-solution-digital-food.streamlit.app/)
 
 ## Structure du Projet
 

@@ -2,6 +2,7 @@ import os
 import re
 import requests
 from bs4 import BeautifulSoup
+from food_index import find_food_url
 
 class Food:
     """ class food """
@@ -65,20 +66,9 @@ class Food:
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                 "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            ),
-            "Accept": "application/rss+xml, application/xml, text/xml, */*",
+            )
         }
         
-        def get_url(food_name: str):
-            """
-            function : normalize the link to avoid breaking the program
-            """
-            food_name = food_name.lower()
-            url_1 = f"https://www.infocalories.fr/calories/calories-{food_name}-fruit.php"
-            url_2 = f"https://www.infocalories.fr/calories/calories-{food_name}.php"
-
-            response_1 = requests.get(timeout=5, url=url_1, headers=headers)
-            return url_1 if response_1.status_code == 200 else url_2
         
         def clean_value(value: str) -> float:
             """
@@ -88,12 +78,11 @@ class Food:
             return float(number.replace(",", "."))
         
         # Fetch the url
-        url = get_url(food_name)
-        response = requests.get(timeout=5, url=url, headers=headers)
-        if response.status_code == 200:
-            pass
-        else: 
-            raise Exception(f"Erreur: {response.status_code}")
+        url = find_food_url(food_name, headers)
+
+        response = requests.get(url, headers=headers, timeout=20)
+        if response.status_code != 200:
+            raise ConnectionError(f"Erreur HTTP {response.status_code} sur {url}")
         
         # load the content (html)
         soup = BeautifulSoup(response.content, "html.parser")

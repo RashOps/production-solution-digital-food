@@ -1,4 +1,6 @@
-""" Retrieve the real url using index"""
+""" 
+Retrieve the real url using index 
+"""
 import re
 import unicodedata
 import difflib
@@ -16,11 +18,10 @@ INDEX_URLS = [
 
 _food_cache: dict[str, str] = {}   # cache manuel 
 
-def normalize(text: str) -> str:
-    nfd = unicodedata.normalize("NFD", text)
-    return "".join(c for c in nfd if unicodedata.category(c) != "Mn").lower().strip()
-
 def aggressive_normalize(text: str) -> str:
+    """
+    Normalise agressivement le texte : minuscule, sans accents, sans mots vides, sans caractères non-alphanumériques.
+    """
     # 1. Passage en minuscule et retrait des accents
     text = "".join(
         c for c in unicodedata.normalize("NFD", text.lower())
@@ -35,6 +36,9 @@ def aggressive_normalize(text: str) -> str:
     return " ".join(text.split())
 
 def _href_to_full_url(href: str) -> str:
+    """
+    Convertit un href relatif en URL complète en utilisant BASE_URL.
+    """
     if href.startswith("http"):
         return href
     if href.startswith("/"):
@@ -42,6 +46,9 @@ def _href_to_full_url(href: str) -> str:
     return BASE_URL + "/" + href.lstrip("./")
 
 def build_food_index(headers: dict) -> dict[str, str]:
+    """
+    Construit un index des aliments à partir des pages d'index du site, en utilisant un cache.
+    """
     global _food_cache
     if _food_cache: return _food_cache
 
@@ -88,6 +95,9 @@ def _fallback_urls(food_name: str) -> list[str]:
     ]
 
 def find_food_url(food_name: str, headers: dict, cutoff: float = 0.55) -> str:
+    """
+    Trouve l'URL d'un aliment en utilisant l'index, la correspondance floue ou le fallback.
+    """
     index = build_food_index(headers)
     query = aggressive_normalize(food_name)
     # 1. Match exact dans l'index

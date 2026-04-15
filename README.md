@@ -8,7 +8,9 @@ Ce projet est une application Python qui permet de récupérer les caractéristi
 
 - Recherche d'aliments par nom
 - Récupération automatique des données nutritionnelles
-- Interface web intuitive avec Streamlit
+- Interface web intuitive avec Streamlit (avec sidebar, historique et graphiques)
+- Visualisation graphique des nutriments (barres)
+- Export des données en CSV directement depuis l'interface
 - Script CLI pour utilisation en ligne de commande
 - Sauvegarde des données en CSV
 - Tests unitaires
@@ -19,6 +21,7 @@ Ce projet est une application Python qui permet de récupérer les caractéristi
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.0+-red.svg)](https://streamlit.io/)
 [![Requests](https://img.shields.io/badge/Requests-2.0+-green.svg)](https://requests.readthedocs.io/)
 [![BeautifulSoup](https://img.shields.io/badge/BeautifulSoup-4.0+-orange.svg)](https://www.crummy.com/software/BeautifulSoup/)
+[![Pandas](https://img.shields.io/badge/Pandas-1.0+-blue.svg)](https://pandas.pydata.org/)
 
 ## Installation
 
@@ -57,7 +60,13 @@ Lancez l'application web :
 streamlit run main.py
 ```
 
-Ouvrez votre navigateur à l'adresse indiquée (généralement http://localhost:8501) et entrez le nom d'un aliment pour obtenir ses caractéristiques nutritionnelles.
+Ouvrez votre navigateur à l'adresse indiquée (généralement http://localhost:8501). L'interface offre :
+- Une recherche d'aliments avec validation d'entrée
+- Affichage des métriques nutritionnelles
+- Graphique en barres pour la répartition des nutriments
+- Historique des recherches dans la sidebar
+- Export des données en CSV
+- Indicateur visuel pour les aliments gras/non gras
 
 ### Script en Ligne de Commande
 
